@@ -8,6 +8,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "buffer": "^5.4.3",
     "react": "16.8.6",
     "react-native": "0.60.5",
     "react-native-dialogflow": "^3.2.2",

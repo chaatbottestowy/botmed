@@ -5,8 +5,8 @@ import Chat from './pages/Chat';
 
 const Routes = createAppContainer(
   createSwitchNavigator({
-    Chat,
     Main,
+    Chat,
   }),
 );
 
