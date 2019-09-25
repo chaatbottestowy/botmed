@@ -70,7 +70,6 @@ export default class Chat extends Component {
       Dialogflow_V2.LANG_PORTUGUESE_BRAZIL,
       project_id,
     );
-    // eslint-disable-next-line react/no-did-mount-set-state
     this.setState({
       messages: [this.msg, ...this.state.messages],
     });
