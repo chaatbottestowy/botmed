@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { Component } from 'react';
 import { Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
 import { Dialogflow_V2 } from 'react-native-dialogflow';
 import { GiftedChat, Send } from 'react-native-gifted-chat';
-import uuid from 'react-native-uuid';
 
 import { Container, SendButton, SendButtonIcon } from './styles';
 import {
@@ -11,109 +10,116 @@ import {
   project_id,
 } from '../../secrets/dialogconfig.json';
 
-export default function Chat() {
-  Dialogflow_V2.setConfiguration(
-    client_email,
-    private_key,
-    Dialogflow_V2.LANG_PORTUGUESE_BRAZIL,
-    project_id,
-  );
-
-  const botUser = {
-    _id: 2,
-    name: 'BotMed',
-    avatar: require('../../assets/bot.png'),
+export default class Chat extends Component {
+  constructor(props) {
+    super(props);
+    this.botUser = {
+      _id: 2,
+      name: 'BotMed',
+      avatar: require('../../assets/bot.png'),
+    };
+    this.msg = {
+      _id: 1,
+      text:
+        'Olá, eu sou o BotMed 🤖 e estou aqui pra lhe ajudar.\n\nVamos nos conhecer melhor me diga qual o seu nome?',
+      createdAt: new Date(),
+      user: this.botUser,
+    };
+  }
+  state = {
+    messages: [],
   };
 
-  const msg = {
-    _id: 1,
-    text:
-      'Olá, eu sou o BotMed e estou aqui pra lhe ajudar. Vamos nos conhecer melhor me diga qual o seu nome?',
-    createdAt: new Date(),
-    user: botUser,
-  };
-  const [messages, setMessages] = useState([msg]);
-
-  const onSend = (newMessage = []) => {
-    setMessages(GiftedChat.append(messages, newMessage));
-    let message = messages[-1].text;
-    console.log(message);
-    if (message._id !== msg._id) {
-      Dialogflow_V2.requestQuery(
-        message,
-        result => handleResponse(result),
-        error => console.log(error),
-      );
-    }
-    return;
+  onSend = (messages = []) => {
+    this.setState(previousState => ({
+      messages: GiftedChat.append(previousState.messages, messages),
+    }));
+    let message = messages[0].text;
+    Dialogflow_V2.requestQuery(
+      message,
+      result => this.handleResponse(result),
+      error => console.log(error),
+    );
   };
 
-  const handleResponse = result => {
-    console.log(result);
+  handleResponse(result) {
     let text = result.queryResult.fulfillmentMessages[0].text.text[0];
     let payload = result.queryResult.webhookPayload;
-    showResponse(text, payload);
-  };
+    this.showResponse(text, payload);
+  }
 
-  const showResponse = (text, payload) => {
+  showResponse(text, payload) {
     let newMsg = {
-      _id: uuid.v4(),
-      text: text.queryResult.fulfillmentText,
+      _id: this.state.messages.length + 1,
+      text: text,
       createdAt: new Date(),
-      user: botUser,
+      user: this.botUser,
     };
-
     if (payload && payload.is_image) {
-      console.log(text);
-      newMsg.text = text;
       newMsg.image = payload.url;
     }
-    setMessages(GiftedChat.append(messages, newMsg));
-    // this.setState(previousState => ({
-    //   messages: GiftedChat.append(previousState.messages, [msg]),
-    // }));
-  };
+    this.setState(previousState => ({
+      messages: GiftedChat.append(previousState.messages, newMsg),
+    }));
+  }
 
-  const renderSend = props => (
-    <Send {...props}>
-      <SendButton>
-        <SendButtonIcon
-          source={require('../../assets/send.png')}
-          resizeMode="cover"
-        />
-      </SendButton>
-    </Send>
-  );
+  componentDidMount() {
+    Dialogflow_V2.setConfiguration(
+      client_email,
+      private_key,
+      Dialogflow_V2.LANG_PORTUGUESE_BRAZIL,
+      project_id,
+    );
+    // eslint-disable-next-line react/no-did-mount-set-state
+    this.setState({
+      messages: [this.msg, ...this.state.messages],
+    });
+  }
 
-  return (
-    <Container>
-      {Platform.OS === 'android' ? (
-        <KeyboardAvoidingView behavior="padding">
+  renderSend(props) {
+    return (
+      <Send {...props}>
+        <SendButton>
+          <SendButtonIcon
+            source={require('../../assets/send.png')}
+            resizeMode="cover"
+          />
+        </SendButton>
+      </Send>
+    );
+  }
+  render() {
+    const { messages } = this.state;
+    return (
+      <Container>
+        {Platform.OS === 'android' ? (
+          <KeyboardAvoidingView behavior="padding">
+            <GiftedChat
+              style={styles.container}
+              messages={messages}
+              placeholder="Digite sua menssagem..."
+              isAnimated={true}
+              onSend={newMessage => this.onSend(newMessage)}
+              renderSend={this.renderSend}
+              user={{ _id: 1 }}
+              locale="pt-BR"
+            />
+          </KeyboardAvoidingView>
+        ) : (
           <GiftedChat
             style={styles.container}
             messages={messages}
             placeholder="Digite sua menssagem..."
             isAnimated={true}
-            onSend={newMessage => onSend(newMessage)}
-            renderSend={renderSend}
+            onSend={newMessage => this.onSend(newMessage)}
+            renderSend={this.renderSend}
             user={{ _id: 1 }}
             locale="pt-BR"
           />
-        </KeyboardAvoidingView>
-      ) : (
-        <GiftedChat
-          style={styles.container}
-          messages={messages}
-          placeholder="Digite sua menssagem..."
-          isAnimated={true}
-          onSend={newMessage => onSend(newMessage)}
-          renderSend={renderSend}
-          user={{ _id: 1 }}
-          locale="pt-BR"
-        />
-      )}
-    </Container>
-  );
+        )}
+      </Container>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
