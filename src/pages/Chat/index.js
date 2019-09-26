@@ -46,20 +46,19 @@ export default class Chat extends Component {
     let text = '';
     let payload = '';
     if (result.queryResult.fulfillmentMessages.length > 1) {
-      text = result.queryResult.fulfillmentMessages[0];
+      text = result.queryResult.fulfillmentMessages[0].text.text[0];
       payload = result.queryResult.fulfillmentMessages[1].payload;
     } else {
-      text = result.queryResult.fulfillmentMessages[0];
+      text = result.queryResult.fulfillmentMessages[0].text.text[0];
       payload = { is_image: false };
     }
-    console.log(JSON.stringify(result), text, payload);
     this.showResponse(text, payload);
   }
 
   showResponse(text, payload) {
     let newMsg = {
       _id: this.state.messages.length + 1,
-      text: text.text.text[0],
+      text: text,
       createdAt: new Date(),
       image: '',
       user: this.botUser,
