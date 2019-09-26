@@ -43,19 +43,28 @@ export default class Chat extends Component {
   };
 
   handleResponse(result) {
-    let text = result.queryResult.fulfillmentMessages[0].text.text[0];
-    let payload = result.queryResult.webhookPayload;
+    let text = '';
+    let payload = '';
+    if (result.queryResult.fulfillmentMessages.length > 1) {
+      text = result.queryResult.fulfillmentMessages[0];
+      payload = result.queryResult.fulfillmentMessages[1].payload;
+    } else {
+      text = result.queryResult.fulfillmentMessages[0];
+      payload = { is_image: false };
+    }
+    console.log(JSON.stringify(result), text, payload);
     this.showResponse(text, payload);
   }
 
   showResponse(text, payload) {
     let newMsg = {
       _id: this.state.messages.length + 1,
-      text: text,
+      text: text.text.text[0],
       createdAt: new Date(),
+      image: '',
       user: this.botUser,
     };
-    if (payload && payload.is_image) {
+    if (payload !== undefined && payload.is_image) {
       newMsg.image = payload.url;
     }
     this.setState(previousState => ({
