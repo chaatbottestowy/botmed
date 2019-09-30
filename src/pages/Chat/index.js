@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Dialogflow_V2 } from 'react-native-dialogflow';
 import { GiftedChat, Send } from 'react-native-gifted-chat';
 
@@ -99,31 +99,16 @@ export default class Chat extends Component {
     const { messages } = this.state;
     return (
       <Container>
-        {Platform.OS === 'android' ? (
-          <KeyboardAvoidingView behavior="padding">
-            <GiftedChat
-              style={styles.container}
-              messages={messages}
-              placeholder="Digite sua menssagem..."
-              isAnimated={true}
-              onSend={newMessage => this.onSend(newMessage)}
-              renderSend={this.renderSend}
-              user={{ _id: 1 }}
-              locale="pt-BR"
-            />
-          </KeyboardAvoidingView>
-        ) : (
-          <GiftedChat
-            style={styles.container}
-            messages={messages}
-            placeholder="Digite sua menssagem..."
-            isAnimated={true}
-            onSend={newMessage => this.onSend(newMessage)}
-            renderSend={this.renderSend}
-            user={{ _id: 1 }}
-            locale="pt-BR"
-          />
-        )}
+        <GiftedChat
+          style={styles.container}
+          messages={messages}
+          placeholder="Digite sua menssagem..."
+          isAnimated={true}
+          onSend={newMessage => this.onSend(newMessage)}
+          renderSend={this.renderSend}
+          user={{ _id: 1 }}
+          locale="pt-BR"
+        />
       </Container>
     );
   }
@@ -132,6 +117,7 @@ export default class Chat extends Component {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
+    backgroundColor: 'red',
     flex: 1,
     paddingHorizontal: 20,
   },
